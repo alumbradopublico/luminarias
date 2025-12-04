@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscador de Luminarias</title>
+    <style>
+        body {
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            text-align: center;
+        }
+
+        input {
+            margin: 10px;
+            padding: 5px;
+        }
+
+        .luminaria {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            display: inline-block;
+            width: 200px;
+            background-color: #def5f5;
+        }
+
+        img {
+            max-width: 100px;
+            height: 100px;
+            object-fit: contain;
+        }
+
+        #resultados {
+            display: none;
+        }
+
+        .logo {
+            display: inline-block
+        }
+
+        /* Estilo para el lightbox */
+        #lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #lightbox img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            margin: auto;
+        }
+
+        #lightbox.close {
+            display: flex;
+        }
+
+        #close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #fff;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            border-radius: 50%;
+        }
+
+        .grupo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* Estilo para inputs y select */
+        select,
+        input {
+            width: 40%;
+            padding: 8px;
+            text-align: center;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        #searchMunicipio {
+            padding: 20px;
+            margin: 15px;
+            width: 60%;
+        }
+
+        select#searchMunicipio {
+            text-align-last: center;
+        }
+
+        #titulo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            color: darkgrey;
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            font-size: 0.5rem;
+            gap: 0px;
+        }
+
+        #logo {
+            max-width: 80%;
+            max-height: 80%;
+            width: 150px;
+            height: 150px;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        h1 {
+            margin-top: -50px;
+        }
+
+        /* --- PEQUEÑO AGREGADO PARA EL BOTÓN DE LOGIN (Siguiendo tu línea) --- */
+        button {
+            padding: 10px 20px;
+            background-color: #def5f5;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #cceeee;
+        }
+
+        /* Ocultar la app al inicio */
+        #app-principal {
+            display: none;
+        }
+
+        #btn-logout {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+
+            background-color: #ffcccc;
+            border: 1px solid red;
+            color: red;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #btn-logout:hover {
+            background-color: #ffaaaa;
+
+        }
+
+        /* Estilo para ubicar el botón de Cargar debajo del de Cerrar Sesión */
+        #admin-controls {
+            position: absolute;
+            top: 80px;  /* 20px del botón de arriba + su altura + un espacio */
+            right: 20px;
+            z-index: 100; /* Para que quede por encima de todo */
+        }
+
+        /* Ajuste visual del botón para que combine mejor en la esquina */
+        #admin-controls button {
+            margin-top: 0; /* Quitamos margen que tenía antes */
+            font-size: 0.8rem; /* Un poco más chico para la esquina */
+            padding: 8px 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Sombra suave para destacar */
+        }
+
+        #btn-logout,
+        #admin-controls button {
+            width: 180px;           /* Ancho fijo para ambos */
+            padding: 10px 0;        /* Mismo relleno vertical */
+            font-size: 0.9rem;      /* Mismo tamaño de letra */
+            text-align: center;     /* Texto centrado */
+            display: flex;          /* Para centrar el icono y texto */
+            justify-content: center;
+            align-items: center;
+            gap: 8px;               /* Espacio entre icono y texto */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Sombra suave idéntica */
+        }
+
+        /* Pequeño ajuste para el icono dentro del botón azul */
+        #admin-controls button span {
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 600px) {
+            
+            /* 1. Ajustar los botones de Admin (que no queden flotando arriba tapando todo) */
+            #btn-logout, 
+            #admin-controls {
+                position: absolute;
+                top: 15px; 
+                width: auto;       
+                margin: 0; 
+               
+            }
+
+            #admin-controls {
+                left: 10px;        
+                right: auto;      
+            }
+
+            #btn-logout {
+                right: 10px;     
+                left: auto;
+            }
+
+            /* 4. Ajustes visuales para que sean más compactos */
+            #btn-logout,
+            #admin-controls button {
+                width: auto;        /* Que el botón abrace al texto */
+                font-size: 0.8rem;  /* Letra un poco más chica */
+                padding: 8px 12px;  
+            }
+
+            /* 5. IMPORTANTE: Bajamos el logo para que los botones no lo tapen */
+            #titulo {
+                margin-top: 30px;
+            }
+
+            
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="login-screen">
+        <div id="titulo">
+            <img src="https://lh3.googleusercontent.com/d/1KODmbQ-WXN3myb0ZCUPu_eQs7jigMb6g" alt="logo_edesur"
+                id="logo" />
+            <h1>Alumbrado público</h1>
+
+        </div>
+
+        <h2>Acceso al sistema</h2>
+
+        <div class="grupo" style="margin-top: 20px;">
+            <input type="text" id="loginUser" placeholder="Usuario">
+            <input type="password" id="loginPass" placeholder="Contraseña">
+            <button onclick="iniciarSesion()">Ingresar</button>
+        </div>
+        <p id="error-msg" style="color: red; display: none; font-size: 0.8rem;">Credenciales incorrectas</p>
+    </div>
+
+    <div id="app-principal">
+        <div id="titulo">
+            <img src="https://lh3.googleusercontent.com/d/1KODmbQ-WXN3myb0ZCUPu_eQs7jigMb6g" alt="logo_edesur"
+                id="logo" />
+            <h1>Alumbrado público</h1>
+        </div>
+
+        <div id="admin-controls" style="display: none;">
+            <button onclick="toggleAdminPanel()"
+                style="background-color: #0056b3; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem;">
+                📤 Cargar luminaria
+            </button>
+        </div>
+
+        <div id="admin-panel"
+            style="display: none; background: #e8f0fe; padding: 20px; margin: 20px auto; border-radius: 10px; border: 1px dashed #0056b3; max-width: 500px; position: relative;">
+
+            <h3 style="color: #0056b3; margin-top: 0;">📤 Cargar nueva luminaria</h3>
+
+            <div class="grupo">
+                <select id="newMunicipio" style="background: white;">
+                    <option value="" disabled selected>Seleccioná el municipio</option>
+                    <option value="Almirante Brown">Almirante Brown</option>
+                    <option value="Avellaneda">Avellaneda</option>
+                    <option value="Berazategui">Berazategui</option>
+                    <option value="CABA">Ciudad Autónoma de Buenos Aires</option>
+                    <option value="Cañuelas">Cañuelas</option>
+                    <option value="Esteban Echeverría">Esteban Echeverría</option>
+                    <option value="Ezeiza">Ezeiza</option>
+                    <option value="Florencio Varela">Florencio Varela</option>
+                    <option value="Lanús">Lanús</option>
+                    <option value="Lomas de Zamora">Lomas de Zamora</option>
+                    <option value="Presidente Perón">Presidente Perón</option>
+                    <option value="Quilmes">Quilmes</option>
+                    <option value="San Vicente">San Vicente</option>
+                </select>
+            </div>
+
+            <div class="grupo">
+                <input type="text" id="newModelo" placeholder="Modelo (ej: LED 150W)" style="background: white;">
+            </div>
+
+            <div class="grupo">
+                <input type="text" id="newPotencia" placeholder="Potencia (ej: 150W)" style="background: white;">
+            </div>
+
+            <div class="grupo">
+                <input type="file" id="newFoto" accept="image/*" style="background: white; padding: 10px;">
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                <button id="btn-submit" onclick="procesarFormulario()"
+                    style="background-color: #0056b3; color: white;">Guardar</button>
+                
+                <button onclick="toggleAdminPanel()" style="background-color: #ccc; color: black;">Cancelar</button>
+            </div>
+
+            <p id="upload-msg" style="display:none; font-size: 0.9rem; margin-top: 10px;"></p>
+        </div>
+
+        <h2>Buscador de luminarias</h2>
+        <button id="btn-logout" onclick="cerrarSesion()">Cerrar sesión</button>
+        <select id="searchMunicipio">
+            <option value="" selected>Seleccioná un municipio</option>
+            <option value="Almirante Brown">Almirante Brown</option>
+            <option value="Avellaneda">Avellaneda</option>
+            <option value="Berazategui">Berazategui</option>
+            <option value="CABA">Ciudad Autónoma de Buenos Aires</option>
+            <option value="Cañuelas">Cañuelas</option>
+            <option value="Esteban Echeverría">Esteban Echeverría</option>
+            <option value="Ezeiza">Ezeiza</option>
+            <option value="Florencio Varela">Florencio Varela</option>
+            <option value="Lanús">Lanús</option>
+            <option value="Lomas de Zamora">Lomas de Zamora</option>
+            <option value="Presidente Perón">Presidente Perón</option>
+            <option value="Quilmes">Quilmes</option>
+            <option value="San Vicente">San Vicente</option>
+        </select>
+
+        <div class="grupo">
+            <input type="text" id="searchModelo" placeholder="Buscar por modelo...">
+        </div>
+
+        <div class="grupo">
+            <input type="text" id="searchPotencia" placeholder="Buscar por potencia...">
+        </div>
+        <div id="resultados"></div>
+    </div>
+
+    <div id="lightbox">
+        <div id="close">X</div>
+        <img src="" alt="Imagen en tamaño completo">
+    </div>
+
+    <script>
+        // --- VARIABLES GLOBALES ---
+        let luminarias = [];
+        let idLuminariaAEditar = null; // Variable clave para saber si editamos o creamos
+
+        // Configuración de URLs (Asegúrate que coincidan con tu Backend)
+        const BASE_URL = 'http://localhost:8080';
+        const API_URL_LUMINARIAS = `${BASE_URL}/luminarias`;
+        const API_URL_LOGIN = `${BASE_URL}/login`;          
+
+        // --- INICIO: VERIFICAR SESIÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token_edesur');
+            if (token) {
+                mostrarApp();
+            }
+        });
+
+        // --- 1. LÓGICA DE LOGIN ---
+        async function iniciarSesion() {
+            const usernameInput = document.getElementById('loginUser').value;
+            const passwordInput = document.getElementById('loginPass').value;
+            const errorMsg = document.getElementById('error-msg');
+
+            errorMsg.style.display = 'none';
+
+            if (!usernameInput || !passwordInput) {
+                errorMsg.innerText = "Completa todos los campos";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch(API_URL_LOGIN, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: usernameInput, password: passwordInput })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('token_edesur', data.token);
+                    localStorage.setItem('rol_edesur', data.user.role);
+                    mostrarApp();
+                } else {
+                    errorMsg.innerText = data.message || "Credenciales incorrectas";
+                    errorMsg.style.display = 'block';
+                }
+            } catch (error) {
+                console.error(error);
+                errorMsg.innerText = "Error de conexión";
+                errorMsg.style.display = 'block';
+            }
+        }
+
+        function mostrarApp() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-principal').style.display = 'block';
+
+            const rol = localStorage.getItem('rol_edesur');
+
+            // Mostrar controles de admin solo si es admin
+            if (rol === 'admin') {
+                document.getElementById('admin-controls').style.display = 'block';
+            } else {
+                document.getElementById('admin-controls').style.display = 'none';
+                document.getElementById('admin-panel').style.display = 'none';
+            }
+
+            cargarDatosDeMongo();
+        }
+
+        function cerrarSesion() {
+            localStorage.removeItem('token_edesur');
+            localStorage.removeItem('rol_edesur');
+            location.reload();
+        }
+
+        // --- 2. GESTIÓN DEL PANEL DE ADMIN ---
+        function toggleAdminPanel() {
+            const panel = document.getElementById('admin-panel');
+            const btn = document.getElementById('admin-controls');
+
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                btn.style.display = 'none';
+            } else {
+                // Al cerrar, limpiamos todo para evitar errores
+                cancelarEdicion();
+                panel.style.display = 'none';
+                btn.style.display = 'block';
+            }
+        }
+
+        // --- 3. LÓGICA INTELIGENTE DEL FORMULARIO ---
+        // Esta función decide si guardamos una nueva o actualizamos una vieja
+        function procesarFormulario() {
+            if (idLuminariaAEditar === null) {
+                subirLuminaria(); // Es NUEVA
+            } else {
+                ejecutarEdicion(); // Es EDICIÓN
+            }
+        }
+
+        // --- 4. CREAR LUMINARIA (POST) ---
+        async function subirLuminaria() {
+            const municipio = document.getElementById('newMunicipio').value;
+            const modelo = document.getElementById('newModelo').value;
+            const potencia = document.getElementById('newPotencia').value;
+            const fotoInput = document.getElementById('newFoto');
+            const msg = document.getElementById('upload-msg');
+
+            if (!municipio || !modelo || !potencia || fotoInput.files.length === 0) {
+                alert("Por favor completa todos los datos y la foto.");
+                return;
+            }
+
+            msg.style.display = 'block';
+            msg.innerText = "Subiendo... ⏳";
+            msg.style.color = "blue";
+
+            const formData = new FormData();
+            formData.append('municipio', municipio);
+            formData.append('modelo', modelo);
+            formData.append('potencia', potencia);
+            formData.append('image', fotoInput.files[0]);
+
+            try {
+                const token = localStorage.getItem('token_edesur');
+                // IMPORTANTE: Ruta /upload
+                const response = await fetch(`${API_URL_LUMINARIAS}/upload`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                if (response.ok) {
+                    msg.innerText = "✅ ¡Carga exitosa!";
+                    msg.style.color = "green";
+
+                    // Limpiamos y recargamos
+                    cancelarEdicion();
+                    cargarDatosDeMongo();
+
+                    // Cerramos el panel automáticamente después de 2 seg
+                    setTimeout(() => {
+                        const panel = document.getElementById('admin-panel');
+                        if (panel.style.display === 'block') toggleAdminPanel();
+                    }, 2000);
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error(error);
+                msg.innerText = "❌ Error: " + error.message;
+                msg.style.color = "red";
+            }
+        }
+
+        // --- 5. PREPARAR EDICIÓN (Rellenar Form) ---
+        function editarLuminaria(id) {
+            const luminaria = luminarias.find(l => l._id === id);
+            if (!luminaria) return;
+
+            // Rellenar campos con datos existentes
+            document.getElementById('newMunicipio').value = luminaria.municipio;
+            document.getElementById('newModelo').value = luminaria.modelo;
+            document.getElementById('newPotencia').value = luminaria.potencia;
+
+            // Marcar que estamos editando
+            idLuminariaAEditar = id;
+
+            // Cambiar aspecto del botón Guardar
+            const btnSubmit = document.getElementById('btn-submit');
+            btnSubmit.innerText = "🔄 Actualizar Luminaria";
+            btnSubmit.style.backgroundColor = "#ffcc00"; // Amarillo
+            btnSubmit.style.color = "black";
+
+            // Abrir panel si está cerrado
+            const panel = document.getElementById('admin-panel');
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                document.getElementById('admin-controls').style.display = 'none';
+            }
+
+            // Llevar la pantalla hacia el formulario
+            panel.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- 6. EJECUTAR EDICIÓN (PUT) ---
+        async function ejecutarEdicion() {
+            const municipio = document.getElementById('newMunicipio').value;
+            const modelo = document.getElementById('newModelo').value;
+            const potencia = document.getElementById('newPotencia').value;
+            const msg = document.getElementById('upload-msg');
+
+            // Preparamos JSON (No se edita foto aquí)
+            const datosActualizados = { municipio, modelo, potencia };
+
+            msg.style.display = 'block';
+            msg.innerText = "Actualizando datos... ⏳";
+            msg.style.color = "blue";
+
+            try {
+                const token = localStorage.getItem('token_edesur');
+                const response = await fetch(`${API_URL_LUMINARIAS}/${idLuminariaAEditar}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json' // JSON para editar
+                    },
+                    body: JSON.stringify(datosActualizados)
+                });
+
+                if (response.ok) {
+                    alert("✅ Luminaria actualizada correctamente");
+                    cancelarEdicion(); // Resetea el formulario
+                    cargarDatosDeMongo(); // Refresca la lista
+
+                    // Cerrar panel
+                    toggleAdminPanel();
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error(error);
+                msg.innerText = "Error: " + error.message;
+                msg.style.color = "red";
+            }
+        }
+
+        // --- 7. CANCELAR EDICIÓN (Limpiar) ---
+        function cancelarEdicion() {
+            // Limpiar inputs
+            document.getElementById('newMunicipio').value = "";
+            document.getElementById('newModelo').value = "";
+            document.getElementById('newPotencia').value = "";
+            document.getElementById('newFoto').value = "";
+            document.getElementById('upload-msg').style.display = 'none';
+
+            // Resetear estado
+            idLuminariaAEditar = null;
+
+            // Restaurar botón Guardar original
+            const btnSubmit = document.getElementById('btn-submit');
+            btnSubmit.innerText = "Guardar";
+            btnSubmit.style.backgroundColor = "#0056b3";
+            btnSubmit.style.color = "white";
+        }
+
+        // --- 8. BORRAR LUMINARIA (DELETE) ---
+        async function borrarLuminaria(id) {
+            if (!confirm("⚠️ ¿Estás seguro de que quieres eliminar esta luminaria? Se borrará también de Google Drive.")) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token_edesur');
+                const response = await fetch(`${API_URL_LUMINARIAS}/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    alert("🗑️ Luminaria eliminada");
+                    cargarDatosDeMongo();
+                } else {
+                    const data = await response.json();
+                    alert("Error: " + data.message);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Error de conexión al borrar");
+            }
+        }
+
+        // --- 9. CARGAR DATOS ---
+        function cargarDatosDeMongo() {
+            console.log("Cargando datos...");
+            const token = localStorage.getItem('token_edesur');
+
+            fetch(API_URL_LUMINARIAS, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    luminarias = data;
+                    // Activar listeners de filtros
+                    document.getElementById('searchMunicipio').oninput = filtrarLuminarias;
+                    document.getElementById('searchModelo').oninput = filtrarLuminarias;
+                    document.getElementById('searchPotencia').oninput = filtrarLuminarias;
+
+                    // Mostrar todos al inicio (o filtrar si hay algo escrito)
+                    filtrarLuminarias();
+                })
+                .catch(err => console.error(err));
+        }
+
+        // --- 10. VISUALIZACIÓN Y FILTROS ---
+        function mostrarLuminarias(lista) {
+            const resultados = document.getElementById('resultados');
+            const esAdmin = localStorage.getItem('rol_edesur') === 'admin';
+
+            resultados.innerHTML = '';
+
+            lista.forEach(luminaria => {
+                const imagen = luminaria.link_foto || luminaria.foto;
+
+                let botonesAdmin = '';
+                if (esAdmin) {
+                    // Botones de Editar y Borrar
+                    botonesAdmin = `
+                        <div style="margin-top: 10px; display: flex; justify-content: space-around; border-top: 1px solid #eee; padding-top: 10px;">
+                            <button onclick="editarLuminaria('${luminaria._id}')" style="background: #ffcc00; border:none; border-radius:3px; padding: 5px 10px; cursor:pointer; color: black; font-size: 0.8rem;">✏️ Editar</button>
+                            <button onclick="borrarLuminaria('${luminaria._id}')" style="background: #ff4444; color: white; border:none; border-radius:3px; padding: 5px 10px; cursor:pointer; font-size: 0.8rem;">🗑️ Borrar</button>
+                        </div>
+                    `;
+                }
+
+                resultados.innerHTML += `
+                    <div class="luminaria">
+                        <p><strong>Municipio:</strong> ${luminaria.municipio}</p>
+                        <p><strong>Modelo:</strong> ${luminaria.modelo}</p>
+                        <p><strong>Potencia:</strong> ${luminaria.potencia}</p>
+                        <img src="${imagen}" alt="Luminaria" onerror="this.onerror=null;this.src='https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg'">
+                        ${botonesAdmin}
+                    </div>
+                `;
+            });
+            resultados.style.display = lista.length > 0 ? 'block' : 'none';
+        }
+
+        function normalizarTexto(texto) {
+            return texto ? texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : "";
+        }
+
+        function filtrarLuminarias() {
+            const munQ = normalizarTexto(document.getElementById('searchMunicipio').value);
+            const modQ = normalizarTexto(document.getElementById('searchModelo').value);
+            const potQ = normalizarTexto(document.getElementById('searchPotencia').value);
+
+            if (!munQ && !modQ && !potQ) {
+                // Si no hay filtros, mostramos todo (o puedes ocultar si prefieres)
+                // document.getElementById('resultados').style.display = 'none';
+                // return;
+            }
+
+            const filtradas = luminarias.filter(l =>
+                normalizarTexto(l.municipio).includes(munQ) &&
+                normalizarTexto(l.modelo).includes(modQ) &&
+                normalizarTexto(l.potencia).includes(potQ)
+            );
+            mostrarLuminarias(filtradas);
+        }
+
+        // Lightbox
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = lightbox.querySelector('img');
+        const closeBtn = document.getElementById('close');
+
+        document.getElementById('resultados').addEventListener('click', (event) => {
+            if (event.target.tagName === 'IMG') {
+                lightbox.style.display = 'flex';
+                lightboxImg.src = event.target.src;
+            }
+        });
+
+        closeBtn.addEventListener('click', () => lightbox.style.display = 'none');
+        lightbox.addEventListener('click', (e) => { if (e.target === lightbox) lightbox.style.display = 'none'; });
+
+    </script>
+</body>
+
+</html>
