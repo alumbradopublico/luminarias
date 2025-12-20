@@ -423,6 +423,7 @@
                 if (response.ok) {
                     localStorage.setItem('token_edesur', data.token);
                     localStorage.setItem('rol_edesur', data.user.role);
+                    localStorage.setItem('municipio_edesur', data.user.municipio || "");
                     mostrarApp();
                 } else {
                     errorMsg.innerText = data.message || "Credenciales incorrectas";
@@ -440,6 +441,7 @@
             document.getElementById('app-principal').style.display = 'block';
 
             const rol = localStorage.getItem('rol_edesur');
+            const municipioUsuario = localStorage.getItem('municipio_edesur'); // Recuperamos el dato
 
             // Mostrar controles de admin solo si es admin
             if (rol === 'admin') {
@@ -447,7 +449,20 @@
             } else {
                 document.getElementById('admin-controls').style.display = 'none';
                 document.getElementById('admin-panel').style.display = 'none';
+                const select = document.getElementById('searchMunicipio');
+
+                if (municipioUsuario && municipioUsuario !== "undefined") {
+                    // 1. Forzamos que el select elija su municipio
+                    select.value = municipioUsuario;
+
+                    // 2. Deshabilitamos el select para que no lo pueda cambiar (se pone gris)
+                    select.disabled = true;
+
+                    // 3. (Opcional) Visualmente que se note que está fijo
+                    select.style.backgroundColor = "#e9ecef";
+                }
             }
+
 
             cargarDatosDeMongo();
         }
