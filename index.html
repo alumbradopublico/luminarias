@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscador de Luminarias</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0056b3">
     <style>
         body {
             font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
@@ -262,22 +264,31 @@
 
             .luminaria {
                 font-size: 1.2rem !important;
-                width: 70% !important; /* Que la tarjeta ocupe casi todo el ancho */
+                width: 70% !important;
+                /* Que la tarjeta ocupe casi todo el ancho */
             }
 
-            input, select {
-                font-size: 1.2rem !important; /* Letra bien grande */
-                padding: 12px !important;     /* Más espacio para el dedo */
-                width: 70% !important;      /* Inputs más anchos */
+            input,
+            select {
+                font-size: 1.2rem !important;
+                /* Letra bien grande */
+                padding: 12px !important;
+                /* Más espacio para el dedo */
+                width: 70% !important;
+                /* Inputs más anchos */
             }
 
             #btnLogin {
-                width: 60% !important;       
-                font-size: 1.1rem !important; /* Letra MUY grande */
-                padding: 15px !important;    /* Más gordito para el dedo */
-                margin-top: 20px !important; /* Separado de la contraseña */
-                font-weight: bold;           /* Letra en negrita */
-            
+                width: 60% !important;
+                font-size: 1.1rem !important;
+                /* Letra MUY grande */
+                padding: 15px !important;
+                /* Más gordito para el dedo */
+                margin-top: 20px !important;
+                /* Separado de la contraseña */
+                font-weight: bold;
+                /* Letra en negrita */
+
             }
 
 
@@ -466,18 +477,18 @@
             const rol = localStorage.getItem('rol_edesur');
             const municipioUsuario = localStorage.getItem('municipio_edesur');
 
-            
+
             if (rol === 'admin' || rol === 'empleado') {
                 const select = document.getElementById('searchMunicipio');
-                select.disabled = false;        
-                select.value = "";              
-                select.style.backgroundColor = "white"; 
+                select.disabled = false;
+                select.value = "";
+                select.style.backgroundColor = "white";
             } else {
-                
+
                 const select = document.getElementById('searchMunicipio');
                 if (municipioUsuario && municipioUsuario !== "undefined") {
                     select.value = municipioUsuario;
-                    select.disabled = true;     
+                    select.disabled = true;
                     select.style.backgroundColor = "#e9ecef";
                 }
             }
