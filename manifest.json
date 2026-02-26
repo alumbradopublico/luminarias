@@ -7,12 +7,12 @@
   "theme_color": "#0056b3",
   "icons": [
     {
-      "src": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Edesur_Foto_de_perfil_2022.png",
+      "src": "icons/android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "https://upload.wikimedia.org/wikipedia/commons/4/4a/Edesur_Foto_de_perfil_2022.png",
+      "src": "icons/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
