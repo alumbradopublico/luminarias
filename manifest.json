@@ -1,6 +1,6 @@
 {
   "name": "Alumbrado Público Edesur",
-  "short_name": "Buscador de luminarias,
+  "short_name": "Buscador de luminarias",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
